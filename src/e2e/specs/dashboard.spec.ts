@@ -622,6 +622,7 @@ test.describe(`${process.env.E2E_TEST_ENV} - Breaches Dashboard - Overview Card`
       landingPage,
       authPage,
     );
+
     await expect(dashboardPage.overviewCard).toBeVisible();
     const textArea = dashboardPage.overviewCard.locator("section");
     await expect(textArea.getByText(/No exposures found/)).toBeVisible();
