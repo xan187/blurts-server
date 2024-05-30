@@ -604,6 +604,9 @@ test.describe(`${process.env.E2E_TEST_ENV} - Breaches Dashboard - Overview Card`
 
   test("Verify that the dashboard is displayed correctly for users with no scan results and no breaches", async ({
     dashboardPage,
+    page,
+    authPage,
+    landingPage,
   }) => {
     test.info().annotations.push({
       type: "testrail",
@@ -611,13 +614,19 @@ test.describe(`${process.env.E2E_TEST_ENV} - Breaches Dashboard - Overview Card`
         "https://testrail.stage.mozaws.net/index.php?/cases/view/2463610",
     });
 
-    await dashboardPage.open();
+    await forceLoginAs(
+      "1o2ihiqwjfhabdj@mailinator.com",
+      "TestPass1234",
+      page,
+      landingPage,
+      authPage,
+    );
     await expect(dashboardPage.overviewCard).toBeVisible();
     const textArea = dashboardPage.overviewCard.locator("section");
     await expect(textArea.getByText(/No exposures found/)).toBeVisible();
     await expect(
       textArea.getByText(
-        /Great news! We searched all known data breaches and ...\d+... data broker sites that sell personal info and found no exposures\./,
+        /Great news! We searched all known data breaches and .\d+. data broker sites that sell personal info and found no exposures\./,
       ),
     ).toBeVisible();
     await expect(textArea.getByRole("button")).toBeVisible();
@@ -627,6 +636,16 @@ test.describe(`${process.env.E2E_TEST_ENV} - Breaches Dashboard - Overview Card`
       dashboardPage.overviewCard.locator("figure > div > svg");
     await expect(exposuresCount.getByText("Exposures")).toBeVisible();
     await expect(exposuresCount.getByText("0")).toBeVisible();
+
+    await expect(dashboardPage.exposuresHeading).toBeVisible();
+    expect(await dashboardPage.exposuresHeading.textContent()).toBe(
+      "View all sites where your info is exposed",
+    );
+
+    const noExpFoundMsg = page
+      .locator("div > strong")
+      .getByText("No exposures found");
+    await expect(noExpFoundMsg).toBeVisible();
   });
 });
 
