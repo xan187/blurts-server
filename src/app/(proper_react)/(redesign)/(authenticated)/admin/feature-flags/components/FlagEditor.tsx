@@ -42,7 +42,7 @@ export const FlagEditor = (props: { flag: FeatureFlagRow }) => {
         .concat(newAllowlistedAddresses);
       const allowListResponse = await sendUpdateRequest(props.flag.name, {
         id: "allowList",
-        value: allowList.join(","),
+        value: allowList.map((address) => address.trim()).join(","),
       });
       if (!allowListResponse.ok) {
         throw new Error(await allowListResponse.text());
