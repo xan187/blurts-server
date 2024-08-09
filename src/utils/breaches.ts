@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { getUserEmails } from "../db/tables/emailAddresses.js";
+import { getUserEmails } from "../db/tables/emailAddresses";
 import {
   getBreachesForEmail,
   getFilteredBreaches,
@@ -73,7 +73,7 @@ async function getAllEmailsAndBreaches(
       verifiedEmails.push(
         await bundleVerifiedEmails({
           user,
-          email: user.primary_email,
+          email: email.email,
           recordId: email.id,
           recordVerified: email.verified,
           allBreaches,
