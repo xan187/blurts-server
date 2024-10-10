@@ -194,7 +194,7 @@ declare module "knex/types/tables" {
     id: number;
     subscriber_id: number;
     unsubscribe_token: string;
-    monthly_monitor_report_free: boolean;
+    monthly_monitor_report_free: boolean | null;
     monthly_monitor_report_free_at: Date | null;
   }
 
@@ -519,4 +519,13 @@ declare module "knex/types/tables" {
       >
     >;
   }
+}
+
+interface GoogleAnalyticsClientsRow {
+  id: number;
+  subscriber_id: number;
+  cookie_version: string;
+  cookie_path: string;
+  client_id: string;
+  cookie_timestamp: Date;
 }
