@@ -731,7 +731,6 @@ it("checks that monthly monitor report is available to free users", () => {
         subscriptionBillingAmount={mockedSubscriptionBillingAmount}
         enabledFeatureFlags={[
           "UpdatedEmailPreferencesOption",
-          "MonthlyActivityEmail",
           "MonthlyReportFreeUser",
         ]}
         experimentData={defaultExperimentData}
@@ -775,10 +774,7 @@ it("checks that monthly monitor report is enabled", () => {
         yearlySubscriptionUrl=""
         monthlySubscriptionUrl=""
         subscriptionBillingAmount={mockedSubscriptionBillingAmount}
-        enabledFeatureFlags={[
-          "UpdatedEmailPreferencesOption",
-          "MonthlyActivityEmail",
-        ]}
+        enabledFeatureFlags={["UpdatedEmailPreferencesOption"]}
         experimentData={defaultExperimentData}
         isMonthlySubscriber={true}
         data={mockedPlusSubscriberEmailPreferences}
@@ -823,10 +819,7 @@ it("sends an API call to disable monthly monitor reports", async () => {
         yearlySubscriptionUrl=""
         monthlySubscriptionUrl=""
         subscriptionBillingAmount={mockedSubscriptionBillingAmount}
-        enabledFeatureFlags={[
-          "UpdatedEmailPreferencesOption",
-          "MonthlyActivityEmail",
-        ]}
+        enabledFeatureFlags={["UpdatedEmailPreferencesOption"]}
         experimentData={defaultExperimentData}
         isMonthlySubscriber={true}
         data={mockedPlusSubscriberEmailPreferences}
@@ -846,6 +839,68 @@ it("sends an API call to disable monthly monitor reports", async () => {
     }),
     method: "POST",
   });
+});
+
+it("calls the right telemetry event if a user opts out of monthly report", async () => {
+  global.fetch = jest.fn().mockResolvedValue({ ok: true });
+  const user = userEvent.setup();
+  render(
+    <TestComponentWrapper>
+      <SettingsView
+        l10n={getL10n()}
+        user={{
+          ...mockedUser,
+          subscriber: {
+            ...mockedUser.subscriber!,
+            all_emails_to_primary: true,
+            monthly_monitor_report: true,
+          },
+        }}
+        subscriber={{
+          ...mockedSubscriber,
+          all_emails_to_primary: true,
+          monthly_monitor_report: true,
+        }}
+        breachCountByEmailAddress={{
+          [mockedUser.email]: 42,
+          [mockedSecondaryVerifiedEmail.email]: 42,
+        }}
+        emailAddresses={[mockedSecondaryVerifiedEmail]}
+        fxaSettingsUrl=""
+        fxaSubscriptionsUrl=""
+        yearlySubscriptionUrl=""
+        monthlySubscriptionUrl=""
+        subscriptionBillingAmount={mockedSubscriptionBillingAmount}
+        enabledFeatureFlags={["UpdatedEmailPreferencesOption"]}
+        experimentData={defaultExperimentData}
+        isMonthlySubscriber={true}
+        data={mockedPlusSubscriberEmailPreferences}
+      />
+    </TestComponentWrapper>,
+  );
+  const monthlyMonitorReportBtn = screen.getByLabelText(
+    "Monthly ⁨Monitor Plus⁩ report",
+    { exact: false },
+  );
+
+  await user.click(monthlyMonitorReportBtn);
+
+  expect(mockedRecordTelemetry).toHaveBeenCalledWith(
+    "button",
+    "click",
+    expect.objectContaining({
+      button_id: "monthly_report_opt_out",
+    }),
+  );
+
+  await user.click(monthlyMonitorReportBtn);
+  expect(mockedRecordTelemetry).toHaveBeenCalledWith(
+    "button",
+    "click",
+    expect.objectContaining({
+      button_id: "monthly_report_opt_in",
+    }),
+  );
 });
 
 it("refreshes the session token after changing email alert preferences, to ensure the latest pref is available in it", async () => {

@@ -53,6 +53,7 @@ import {
 import { ExperimentData } from "../../../../../../../telemetry/generated/nimbus/experiments";
 import { PetitionBanner } from "../../../../../../components/client/PetitionBanner";
 import { useLocalDismissal } from "../../../../../../hooks/useLocalDismissal";
+import { DataBrokerRemovalTime } from "../../../../../../functions/server/getDataBrokerRemovalTimeEstimates";
 
 export type TabType = "action-needed" | "fixed";
 
@@ -73,13 +74,13 @@ export type Props = {
   fxaSettingsUrl: string;
   scanCount: number;
   isNewUser: boolean;
-  experimentationId: string;
   hasFirstMonitoringScan: boolean;
   elapsedTimeInDaysSinceInitialScan?: number;
   totalNumberOfPerformedScans?: number;
   activeTab: TabType;
   signInCount: number | null;
   autoOpenUpsellDialog: boolean;
+  removalTimeEstimates: DataBrokerRemovalTime[];
 };
 
 export type TabData = {
@@ -89,9 +90,7 @@ export type TabData = {
 
 export const View = (props: Props) => {
   const l10n = useL10n();
-  const recordTelemetry = useTelemetry({
-    experimentationId: props.experimentationId,
-  });
+  const recordTelemetry = useTelemetry();
   const countryCode = useContext(CountryCodeContext);
   const pathname = usePathname();
 
@@ -191,10 +190,15 @@ export const View = (props: Props) => {
       ? "scan-" + exposure.onerep_scan_result_id
       : "breach-" + exposure.id;
 
+    const removalTimeEstimate = isScanResult(exposure)
+      ? props.removalTimeEstimates.find(({ d }) => d === exposure.data_broker)
+      : undefined;
     return (
       <li key={exposureCardKey} className={styles.exposureListItem}>
         <ExposureCard
+          experimentData={props.experimentData}
           enabledFeatureFlags={props.enabledFeatureFlags}
+          removalTimeEstimate={removalTimeEstimate?.t}
           exposureData={exposure}
           isExpanded={exposureCardKey === activeExposureCardKey}
           onToggleExpanded={() => {
@@ -429,6 +433,12 @@ export const View = (props: Props) => {
     );
   };
 
+  const shouldShowPetitionBanner =
+    props.experimentData["data-privacy-petition-banner"].enabled &&
+    props.isEligibleForPremium &&
+    ((activeTab === "fixed" && hasPremium(props.user)) ||
+      (activeTab === "action-needed" && !hasPremium(props.user)));
+
   return (
     <div className={styles.wrapper}>
       <Toolbar
@@ -455,15 +465,12 @@ export const View = (props: Props) => {
           selectedKey={activeTab}
         />
       </Toolbar>
-      {props.experimentData["data-privacy-petition-banner"].enabled &&
-        props.isEligibleForPremium &&
-        ((activeTab === "fixed" && hasPremium(props.user)) ||
-          (activeTab === "action-needed" && !hasPremium(props.user))) && (
-          <PetitionBanner
-            user={props.user}
-            localDismissal={localDismissalPetitionBanner}
-          />
-        )}
+      {shouldShowPetitionBanner && (
+        <PetitionBanner
+          user={props.user}
+          localDismissal={localDismissalPetitionBanner}
+        />
+      )}
       <CsatSurvey
         user={props.user}
         activeTab={activeTab}
@@ -479,6 +486,7 @@ export const View = (props: Props) => {
         lastScanDate={props.userScanData.scan?.created_at ?? null}
         signInCount={props.signInCount}
         localDismissalPetitionBanner={localDismissalPetitionBanner}
+        shouldShowPetitionBanner={shouldShowPetitionBanner}
         isEligibleForPremium={props.isEligibleForPremium}
       />
       <div className={styles.dashboardContent}>
@@ -527,6 +535,7 @@ export const View = (props: Props) => {
         </section>
         <div className={styles.exposuresFilterWrapper}>
           <ExposuresFilter
+            experimentData={props.experimentData}
             enabledFeatureFlags={props.enabledFeatureFlags}
             initialFilterValues={initialFilterState}
             filterValues={filters}

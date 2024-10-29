@@ -3610,6 +3610,112 @@ describe("CSAT survey banner", () => {
     });
     expect(answerButton).toBeInTheDocument();
   });
+
+  it("does not display any CSAT survey alongside the Petition banner", () => {
+    const ComposedDashboard = composeStory(
+      DashboardUsPremiumResolvedScanNoBreaches,
+      Meta,
+    );
+    render(
+      <ComposedDashboard
+        activeTab="fixed"
+        elapsedTimeInDaysSinceInitialScan={90}
+        hasFirstMonitoringScan
+        enabledFeatureFlags={[
+          "LatestScanDateCsatSurvey",
+          "AutomaticRemovalCsatSurvey",
+        ]}
+        experimentData={{
+          ...defaultExperimentData,
+          "data-privacy-petition-banner": {
+            enabled: true,
+          },
+        }}
+      />,
+    );
+
+    const petitionCta = screen.queryByRole("link", {
+      name: "Sign petition",
+    });
+    expect(petitionCta).toBeInTheDocument();
+
+    const answerButton = screen.queryByRole("button", {
+      name: "Neutral",
+    });
+    expect(answerButton).not.toBeInTheDocument();
+  });
+
+  it("displays the removal time estimates CSAT survey on the “fixed” tab for users on the treatment branch", () => {
+    const ComposedDashboard = composeStory(
+      DashboardUsPremiumResolvedScanNoBreaches,
+      Meta,
+    );
+    render(
+      <ComposedDashboard
+        activeTab="fixed"
+        enabledFeatureFlags={["DataBrokerRemovalTimeEstimateCsat"]}
+        experimentData={{
+          ...defaultExperimentData,
+          "data-broker-removal-time-estimates": {
+            enabled: true,
+          },
+        }}
+      />,
+    );
+
+    const answerButton = screen.getByRole("button", {
+      name: "Neutral",
+    });
+    expect(answerButton).toBeInTheDocument();
+  });
+
+  it("displays the removal time estimates CSAT survey on the “fixed” tab for users on the control branch", () => {
+    const ComposedDashboard = composeStory(
+      DashboardUsPremiumResolvedScanNoBreaches,
+      Meta,
+    );
+    render(
+      <ComposedDashboard
+        activeTab="fixed"
+        enabledFeatureFlags={["DataBrokerRemovalTimeEstimateCsat"]}
+        experimentData={{
+          ...defaultExperimentData,
+          "data-broker-removal-time-estimates": {
+            enabled: false,
+          },
+        }}
+      />,
+    );
+
+    const answerButton = screen.getByRole("button", {
+      name: "Neutral",
+    });
+    expect(answerButton).toBeInTheDocument();
+  });
+
+  it("does not display the removal time estimates CSAT survey on the ”action needed” tab for users on the treatment branch", () => {
+    const ComposedDashboard = composeStory(
+      DashboardUsPremiumResolvedScanNoBreaches,
+      Meta,
+    );
+    render(
+      <ComposedDashboard
+        activeTab="action-needed"
+        enabledFeatureFlags={["DataBrokerRemovalTimeEstimateCsat"]}
+        experimentData={{
+          ...defaultExperimentData,
+          "data-broker-removal-time-estimates": {
+            enabled: false,
+          },
+        }}
+      />,
+    );
+
+    const answerButton = screen.queryByRole("button", {
+      name: "Neutral",
+    });
+    expect(answerButton).not.toBeInTheDocument();
+  });
 });
 
 describe("Data privacy petition banner", () => {

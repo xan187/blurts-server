@@ -153,8 +153,8 @@ brand-mozilla-monitor = { -brand-fx-monitor }
 ## Site navigation
 
 mobile-menu-label = 主選單
-main-nav-button-collapse-label = 折疊選單
-main-nav-button-collapse-tooltip = 折疊選單
+main-nav-button-collapse-label = 摺疊選單
+main-nav-button-collapse-tooltip = 摺疊選單
 main-nav-button-expand-label = 展開選單
 main-nav-button-expand-tooltip = 展開選單
 main-nav-label = 導覽
@@ -182,8 +182,6 @@ mozilla = { -brand-mozilla }
 terms-of-service = 服務條款
 privacy-notice = 隱私權公告
 github = { -brand-github }
-# Deprecated
-footer-nav-all-breaches = 所有資料外洩事件
 footer-nav-recent-breaches = 近期的資料外洩事件
 footer-external-link-faq-label = 常見問題
 footer-external-link-faq-tooltip = 常見問題
@@ -201,7 +199,7 @@ error-page-error-other-title = { $errorCode } 有些東西不對勁！
 
 ## Breach overview page
 
-all-breaches-headline-2 = { -brand-fx-monitor } 偵測到的所有資料外洩事件
+all-breaches-headline-3 = 資料外洩事件資料庫
 all-breaches-lead = 我們會監控所有已知的資料外洩事件，檢查您的個人資訊是否已遭外流。以下是自 2007 年起，所有通報過的資料外洩事件的完整清單。
 search-breaches = 搜尋資料外洩事件
 # the kind of user data exposed to hackers in data breach.
